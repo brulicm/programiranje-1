@@ -1,3 +1,4 @@
+import re
 ###############################################################################
 # Hvaležni medved
 #
@@ -25,8 +26,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> find_words(test_text, 'de')
 # {'izdere', 'debel', 'oddide', 'začudeno'}
 ###############################################################################
-
-
+def find_words(besedilo, niz):
+    x = r"\b\w*" + niz + r"\w*\b" #\b je zacetek ali konec besede
+    resitve = re.findall(x,besedilo)
+    return set(resitve)
 ###############################################################################
 # 2) Sestavite funkcijo [find_prefix], ki vrne množico vseh besed, ki se
 #    pojavijo v nizu in imajo dano predpono.
@@ -34,8 +37,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> find_prefix(test_text, 'zi')
 # {'zibala', 'zibel', 'zibelko'}
 ###############################################################################
-
-
+def find_prefix(besedilo, niz):
+    x = r"\b" + niz + r"\w*\b"
+    resitve = re.findall(x, besedilo)
+    return set(resitve)
 ###############################################################################
 # 3) Sestavite funkcijo [find_suffix], ki vrne množico vseh besed, ki se
 #    pojavijo v nizu in imajo dano pripono.
@@ -43,8 +48,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> find_suffix(test_text, 'la')
 # {'zibala', 'razveselila', 'prestrašila', 'šivala', 'opazila', 'tla'}
 ###############################################################################
-
-
+def find_suffix(besedilo, niz):
+    x = r"\b\w*" + niz + r"\b"
+    resitve = re.findall(x, besedilo)
+    return set(resitve)
 ###############################################################################
 # 4) Sestavite funkcijo [double_letters], ki sprejme niz in vrne množico vseh
 #    besed, ki vsebujejo podvojene črke.
@@ -52,3 +59,7 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> double_letters('A volunteer is worth twenty pressed men.')
 # {'volunteer', 'pressed'}
 ###############################################################################
+def double_letters(niz):
+    x = r'(\b\w*(\w)\2\w*\b)' #z \2 poudarim da je grupa2 tam
+    resitve = re.findall(x, niz) #vrne [(besede s podvojenimi, podvojena crka)]
+    return set([resitev[0] for resitev in resitve]) 
