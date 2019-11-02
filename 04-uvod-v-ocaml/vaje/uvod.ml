@@ -153,10 +153,13 @@ let rec remove k = function
  # is_palindrome [0; 0; 1; 0];;
  - : bool = false
 [*----------------------------------------------------------------------------*)
-let rec
-let rec is_palindrome = function
-| [] -> []
-| x :: xs -> ()
+let rec is_palindrome x =
+  let rec obrni = function
+  | [] -> []
+  | x :: xs -> obrni xs @ [x]
+
+  in
+  x = obrni x
 
 (*----------------------------------------------------------------------------*]
  Funkcija [max_on_components] sprejme dva seznama in vrne nov seznam, katerega
@@ -167,7 +170,11 @@ let rec is_palindrome = function
  - : int list = [5; 4; 3; 3; 4]
 [*----------------------------------------------------------------------------*)
 
-let rec max_on_components = ()
+let rec max_on_components list1 list2 =
+  match (list1, list2) with
+  | (x :: xs, y:: ys) -> max x y :: max_on_components xs ys
+  | drugo -> []
+  
 
 (*----------------------------------------------------------------------------*]
  Funkcija [second_largest] vrne drugo največjo vrednost v seznamu. Pri tem se
@@ -178,5 +185,16 @@ let rec max_on_components = ()
  # second_largest [1; 10; 11; 11; 5; 4; 10];;
  - : int = 10
 [*----------------------------------------------------------------------------*)
+let rec second_largest list1= 
+  let rec largest = function
+    | [] -> failwith "List too short"
+        | x :: [] -> x
+        | x :: xs -> max x (largest xs)
+  in
 
-let rec second_largest = ()
+  let rec remove k = function
+    | [] -> []
+    | x :: xs -> if k = x then (remove k xs) else x :: (remove k xs)
+  in
+
+  largest (remove (largest list1) list1)
