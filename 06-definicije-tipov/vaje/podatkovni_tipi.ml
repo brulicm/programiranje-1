@@ -20,7 +20,11 @@
  # dollar_to_euro (Dollar 0.5);;
  - : euro = Euro 0.4305
 [*----------------------------------------------------------------------------*)
+type euro = Euro of float
+type dollar  = Dollar of float
 
+let euro_to_dollar (Euro e) = Dollar (e /. 0.861)
+let dollar_to_euro (Dollar d) = Euro (d *. 0.861)
 
 
 (*----------------------------------------------------------------------------*]
@@ -34,7 +38,10 @@
  # to_pound (Yen 100.);;
  - : currency = Pound 0.007
 [*----------------------------------------------------------------------------*)
-
+type currency =
+       | Yen of float
+       | Pound of float
+       | Krona of float
 
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
