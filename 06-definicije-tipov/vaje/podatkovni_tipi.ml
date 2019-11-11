@@ -49,6 +49,7 @@ let to_pound = function
   | Pound f -> Pound ( f)
   | Krona f -> Pound (f *. 1.3)
 
+
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Želimo uporabljati sezname, ki hranijo tako cela števila kot tudi logične
  vrednosti. To bi lahko rešili tako da uvedemo nov tip, ki predstavlja celo
@@ -105,13 +106,12 @@ let rec intbool_reverse intbool_list =
  vrednosti. Funkcija je repno rekurzivna in ohranja vrstni red elementov.
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_separate ib_list = 
-  let rec intbool_separate' ib_list acc1 acc2 =
-    match ib_list with
+(*let rec intbool_separate ib_list = 
+  let rec sep ib_list acc1 acc2 = function
     | Nil -> (acc1, acc2)
-    | Int(i, ibl) -> intbool_separate ibl (i :: acc1) acc2
-    | Bool(b, ibl) -> intbool_separate ibl acc1 (b :: acc2)
-  in intbool_separate' ib_list [] []
+    | Int(i, ibl) -> sep (i :: acc1) acc2 ibl
+    | Bool(b, ibl) -> sep acc1 (b :: acc2) ibl
+  in sep [] [] (intbool_reverse ib_list)*)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Določeni ste bili za vzdrževalca baze podatkov za svetovno priznano čarodejsko
@@ -128,9 +128,15 @@ let rec intbool_separate ib_list =
  raziskovanje oz. historian, teacher in researcher. Definirajte tip
  [specialisation], ki loči med temi zaposlitvami.
 [*----------------------------------------------------------------------------*)
+type magic =
+  | Fire 
+  | Frost
+  | Arcane
 
-
-
+type specialisation =
+  | Histrorian
+  | Teacher
+  | Researcher
 (*----------------------------------------------------------------------------*]
  Vsak od čarodejev začne kot začetnik, nato na neki točki postane študent,
  na koncu pa SE lahko tudi zaposli.
@@ -145,8 +151,15 @@ let rec intbool_separate ib_list =
  # professor;;
  - : wizard = {name = "Matija"; status = Employed (Fire, Teacher)}
 [*----------------------------------------------------------------------------*)
+type status =
+  | Newbie
+  | Student of magic * int
+  | Employed of magic * specialisation
 
+type wizard = {name: string; status: status}
 
+let professor = {name = "Matija"; status = Employed(Fire, Teacher)}
+  
 
 (*----------------------------------------------------------------------------*]
  Želimo prešteti koliko uporabnikov posamezne od vrst magije imamo na akademiji.
@@ -158,7 +171,13 @@ let rec intbool_separate ib_list =
  # update {fire = 1; frost = 1; arcane = 1} Arcane;;
  - : magic_counter = {fire = 1; frost = 1; arcane = 2}
 [*----------------------------------------------------------------------------*)
+type magic_counter = {fire: int; frost: int; arcane: int}
 
+let update counter magic = 
+  match magic with
+  | Fire -> {fire = counter.fire + 1; frost = counter.frost; arcane = counter.arcane}
+  | Frost -> {counter with frost = counter.frost + 1}
+  | Arcane -> {counter with arcane = counter.arcane + 1}
 
 
 (*----------------------------------------------------------------------------*]
@@ -169,7 +188,17 @@ let rec intbool_separate ib_list =
  - : magic_counter = {fire = 3; frost = 0; arcane = 0}
 [*----------------------------------------------------------------------------*)
 
-let rec count_magic = ()
+let rec count_magic ws =
+  let rec magic_counter counter = function
+  | [] -> counter
+  | w :: wz -> 
+      (match w.status with
+      | Newbie -> magic_counter counter wz
+      | Student(magic, _) | Employed(magic, _) ->
+          let counter' = update counter magic in
+          magic_counter counter' wz)
+  in
+  magic_counter {fire = 0; frost=0;arcane=0} ws
 
 (*----------------------------------------------------------------------------*]
  Želimo poiskati primernega kandidata za delovni razpis. Študent lahko postane
