@@ -20,9 +20,14 @@
  # dollar_to_euro (Dollar 0.5);;
  - : euro = Euro 0.4305
 [*----------------------------------------------------------------------------*)
+type euro = Euro of float
 
+type dollar = Dollar of float 
 
-
+let euro_to_dollar (Euro e) = Dollar (1.1 *. e)
+let dollar_to_euro d = 
+  match d with
+    Dollar d -> Euro (0.91 *. d)
 (*----------------------------------------------------------------------------*]
  Definirajte tip [currency] kot en vsotni tip z konstruktorji za jen, funt
  in švedsko krono. Nato napišite funkcijo [to_pound], ki primerno pretvori
@@ -34,8 +39,15 @@
  # to_pound (Yen 100.);;
  - : currency = Pound 0.007
 [*----------------------------------------------------------------------------*)
+type currency =
+  | Yen of float
+  | Pound of float
+  | Krona of float
 
-
+let to_pound = function
+  | Yen f -> Pound (f *. 0.007)
+  | Pound f -> Pound ( f)
+  | Krona f -> Pound (f *. 1.3)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Želimo uporabljati sezname, ki hranijo tako cela števila kot tudi logične
@@ -56,23 +68,36 @@
 
  Nato napišite testni primer, ki bi predstavljal "[5; true; false; 7]".
 [*----------------------------------------------------------------------------*)
+type intbool_list =
+  | Nil
+  | Int of int * intbool_list
+  | Bool of bool * intbool_list
 
-
-
+let test = Int (5, Bool (true, Bool (false, Int (7, Nil))))
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_map f_int f_bool ib_list] preslika vrednosti [ib_list] v nov
  [intbool_list] seznam, kjer na elementih uporabi primerno od funkcij [f_int]
  oz. [f_bool].
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_map = ()
+let rec intbool_map intbool_map f_int f_bool ib_list =
+  match ib_list with
+  | Nil -> Nil
+  | Int (i, ibl) -> Int (f_int i, intbool_map f_int f_bool ibl)
+  | Bool (b, ibl) -> Bool (f_bool b, intbool_map f_int f_bool ibl)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_reverse] obrne vrstni red elementov [intbool_list] seznama.
  Funkcija je repno rekurzivna.
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_reverse = ()
+let rec intbool_reverse intbool_list = 
+  let rec ib_rev intbool_list acc =
+    match intbool_list with
+    | Nil -> acc
+    | Int(i, ibl) -> ib_rev ibl (Int (i, acc))
+    | Bool(b, ibl) -> ib_rev ibl (Bool (b, acc))
+  in ib_rev intbool_list Nil
 
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_separate ib_list] loči vrednosti [ib_list] v par [list]
@@ -80,7 +105,13 @@ let rec intbool_reverse = ()
  vrednosti. Funkcija je repno rekurzivna in ohranja vrstni red elementov.
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_separate = ()
+let rec intbool_separate ib_list = 
+  let rec intbool_separate' ib_list acc1 acc2 =
+    match ib_list with
+    | Nil -> (acc1, acc2)
+    | Int(i, ibl) -> intbool_separate ibl (i :: acc1) acc2
+    | Bool(b, ibl) -> intbool_separate ibl acc1 (b :: acc2)
+  in intbool_separate' ib_list [] []
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Določeni ste bili za vzdrževalca baze podatkov za svetovno priznano čarodejsko
