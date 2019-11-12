@@ -4,13 +4,14 @@
 Namig: Definirajte pomožno funkcijo za obračanje seznamov.
 [*----------------------------------------------------------------------------*)
 
+
 let rec reverse list =
   let rec rev acc list=
     match list with
     | [] -> acc
-    | x :: xs -> rev xs (x :: xs)
-  in
-  rev list []
+    | x :: xs -> rev (x :: acc) xs
+    in
+    rev [] list
 
 (*----------------------------------------------------------------------------*]
  Funkcija [repeat x n] vrne seznam [n] ponovitev vrednosti [x]. Za neprimerne
@@ -148,12 +149,14 @@ let rec unzip = function
  # unzip_tlrec [(0,"a"); (1,"b"); (2,"c")];;
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
-
-let rec unzip_tlrec list =
-  let unzip_tlrec' list acc =
+let rec unzip_tlrec list=
+  let rec unzip_tlrec' list acc1 acc2 =
     match list with
-    | [] -> acc, acc
-    | (x, y) :: xys ->
+    | [] -> (reverse acc1 , reverse acc2)
+    | (x, y) :: xys -> unzip_tlrec' xys (x::acc1) (y::acc2)
+  in
+  unzip_tlrec' list [] []
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [loop condition f x] naj se izvede kot python koda:
@@ -167,9 +170,8 @@ let rec unzip_tlrec list =
  # loop (fun x -> x < 10) ((+) 4) 4;;
  - : int = 12
 [*----------------------------------------------------------------------------*)
-
-let rec loop = ()
-
+let rec loop condition f x = 
+  if condition x then loop condition f (f x) else x
 (*----------------------------------------------------------------------------*]
  Funkcija [fold_left_no_acc f list] sprejme seznam [x0; x1; ...; xn] in
  funkcijo dveh argumentov [f] in vrne vrednost izračuna
@@ -180,7 +182,12 @@ let rec loop = ()
  - : string = "FICUS"
 [*----------------------------------------------------------------------------*)
 
-let rec fold_left_no_acc = ()
+let rec fold_left_no_acc f list = 
+  match list with
+  | [] -> failwith "List too short"
+  | [x] -> failwith "List too short"
+  | x :: y :: [] -> f x y
+  | x0 :: (x1 :: xs ) -> fold_left_no_acc f ((f x0 x1) :: xs)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [apply_sequence f x n] vrne seznam zaporednih uporab funkcije [f] na
@@ -194,7 +201,14 @@ let rec fold_left_no_acc = ()
  - : int list = []
 [*----------------------------------------------------------------------------*)
 
-let rec apply_sequence = ()
+let rec apply_sequence f x n =
+  let rec apply_sequence' f x n acc =
+    if n < 0 then
+      reverse acc
+    else
+      apply_sequence' f (f x) (n - 1) (x :: acc)
+    in
+    apply_sequence' f x n []
 
 (*----------------------------------------------------------------------------*]
  Funkcija [filter f list] vrne seznam elementov [list], pri katerih funkcija [f]
@@ -204,7 +218,14 @@ let rec apply_sequence = ()
  - : int list = [4; 5]
 [*----------------------------------------------------------------------------*)
 
-let rec filter = ()
+let rec filter f list =
+  match list with
+  | [] -> []
+  | x :: xs ->
+    if f x then
+      x :: filter f xs
+    else 
+      filter f xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [exists] sprejme seznam in funkcijo, ter vrne vrednost [true] čim
@@ -217,8 +238,10 @@ let rec filter = ()
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let rec exists = ()
-
+let rec exists list f =
+    match list with
+    | [] -> false
+    | x :: xs -> f x || exists xs f
 (*----------------------------------------------------------------------------*]
  Funkcija [first f default list] vrne prvi element seznama, za katerega
  funkcija [f] vrne [true]. Če takšnega elementa ni, vrne [default].
@@ -230,4 +253,11 @@ let rec exists = ()
  - : int = 0
 [*----------------------------------------------------------------------------*)
 
-let rec first = ()
+let rec first f default list =
+  match list with
+  | [] -> default
+  | x :: xs -> 
+    if f x then
+      x
+    else
+      first f default xs

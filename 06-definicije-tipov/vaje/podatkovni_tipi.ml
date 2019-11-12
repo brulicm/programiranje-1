@@ -43,7 +43,7 @@ type currency =
        | Pound of float
        | Krona of float
 
-let to_pound = function
+let to_ pound = function
        | Yen y -> Pound (y *. 0.007)
        | Pound p -> Pound p
        | Krona k -> Pound (k *. 0.081)
