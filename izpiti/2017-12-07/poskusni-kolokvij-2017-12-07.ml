@@ -35,13 +35,19 @@ let kompozitum f g x = f (g x)
    tipom /'a drevo/ z enim konstruktorjem, ki sprejme:
    - vrednost (koren) tipa /'a/ in
    - seznam (gozd) dreves tipa /'a drevo/. *)
-type 'a drevo = DopolniMe
+type 'a drevo = Rose of 'a * 'a drevo list
 
 (* 2.2) Napišite funkcijo, ki vrne koren danega rožnega drevesa. *)
-let koren = ()
+let koren (Rose(koren, gozd)) = koren
 
 (* 2.3) Napišite funkcijo, ki preveri, ali drevo celih števil vsebuje kakšno negativno število. *)
-let kaksno_negativno = ()
+let rec kaksno_negativno (Rose(koren, gozd)) = 
+  let rec for_one f list =
+    match list with
+    | [] -> true
+    | x :: xs -> f x || for_one f xs
+    in
+    koren < 0 || for_one kaksno_negativno gozd
 
 (* 2.4) Sestavite funkcijo, ki sprejme naravno število ter sestavi (poljubno)
    drevo, ki ima toliko otrok.
