@@ -189,7 +189,7 @@ let rec index_min a lower upper =
 let rec selection_sort_array  a = 
     let len = Array.lenght a in
     let rec sorter lower =
-        if lower <= len then () 
+        if lower >= len then () 
         else
             let mini = index_min a lower (len-1) in
             let () = swap a in lower mini in
