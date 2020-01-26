@@ -47,4 +47,20 @@ soba = [[0, 1, 0, 0, 2],
 
 
 def pobeg(soba, pozicija, koraki):
-    return None
+    dimx = len(soba)
+    dimy = len(soba[0])
+
+    @lru_cache(maxsize=None)
+    def pobegni(vrsta, stolpec, koraki):
+        if not (0 <= vrsta < dimx) or not (0 <= stolpec < dimy):
+            return False #Nisem v sobi
+        elif soba[vrsta][stolpec] == 1:
+            return True
+        elif koraki > 0 and soba[vrsta][stolpec] == 0:
+            return any(
+                [pobegni(vrsta + 1, stolpec, koraki - 1),
+                 pobegni(vrsta - 1, stolpec, koraki - 1),
+                 pobegni(vrsta, stolpec + 1, koraki - 1),
+                 pobegni(vrsta, stolpec - 1, koraki - 1)]) # ce katerikoli od teh uspe mi je uspelo
+        return False #ce je na oviri
+    return pobegni(pozicija[0], pozicija[1], koraki)
