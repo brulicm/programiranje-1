@@ -10,7 +10,27 @@ from functools import lru_cache
 
 
 def najdaljse_narascajoce_podzaporedje(sez):
-    return None
+
+    @lru_cache(maxsize=256)
+    def najdaljse(i, meja):
+        #Iščemo najdaljše podzaporedje od indeksa i naprej
+        if i >= len(sez):
+            return []
+        #Ali sprejmemo i-ti element
+        elif sez[i] < meja:
+        #Preskočimo
+            return najdaljse(i+1, meja)
+        else:
+            sprejmemo = [sez[i]] + najdaljse(i+1, sez[i])
+            zavrnemo = najdaljse(i+1, meja)
+            if len(sprejmemo) > len(zavrnemo):
+                return sprejmemo
+            else:
+                return zavrnemo
+    return najdaljse(0, sez[0])
+
+
+
 
 ###############################################################################
 # Nepreviden študent je pustil robotka z umetno inteligenco nenadzorovanega.
