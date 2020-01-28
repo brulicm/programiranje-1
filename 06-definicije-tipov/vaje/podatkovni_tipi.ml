@@ -134,7 +134,7 @@ type magic =
   | Arcane
 
 type specialisation =
-  | Histrorian
+  | Historian
   | Teacher
   | Researcher
 (*----------------------------------------------------------------------------*]
@@ -214,4 +214,18 @@ let rec count_magic ws =
  - : string option = Some "Jaina"
 [*----------------------------------------------------------------------------*)
 
-let rec find_candidate = ()
+let find_candidate magic specialisation wizard_list =
+  let year =
+    match specialisation with
+    | Historian -> 3
+    | Researcher -> 4
+    | Teacher -> 5
+  in
+  let rec search = function
+    | [] -> None
+    | {name; status} :: wizards ->
+        match status with
+        | Student (m, y) when m = magic && y >= year -> Some name
+        | _ -> search wizards
+  in
+  search wizard_list

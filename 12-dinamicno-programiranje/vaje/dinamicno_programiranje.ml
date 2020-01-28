@@ -82,7 +82,7 @@ let max_cheese cheese_matrix =
 [*----------------------------------------------------------------------------*)
 type color = Red | Blue
 
-let alternating_towers h = 
+(*let alternating_towers h = 
   (* Establish bounds ~ tu ne rabimo, prej smo*)
   (*Make memory ~ nardili bomo dva, za modre in rdece*)
   let red_mem = Array.make (h+1) 0  in
@@ -110,7 +110,7 @@ let alternating_towers h =
     loop (n+1)
   in
   (*Return result*)
-  let _ = loop 0 in red_mem.(h) + blue_mem.(h)
+  let _ = loop 0 in red_mem.(h) + blue_mem.(h)*)
 (*----------------------------------------------------------------------------*]
  Na nagradni igri ste zadeli kupon, ki vam omogoča, da v Mercatorju kupite
  poljubne izdelke, katerih skupna masa ne presega [max_w] kilogramov. Napišite
@@ -161,6 +161,17 @@ let leaf x = Node (Empty, x, Empty)
 
 let test_tree = Node( Node(leaf 0, 2, leaf 13), 5, Node(leaf 9, 7, leaf 4))
 
+let max_aux a b = match (a,b) with 
+  | (Some a', None) -> a'
+  | (None, Some b') -> b'
+  | (Some a', Some b') -> max a' b'
+  | _ -> failwith "Error"
+
+let rec max_path = function
+    | Empty -> None
+    | Node(Empty, x, Empty) -> Some x
+    | Node(lt, x, rt) -> Some ( x + max_aux ( max_path lt) (max_path rt))
+
 (*----------------------------------------------------------------------------*]
  Cena sprehoda po drevesu je vsota vrednosti v vseh obiskanih vozliščih.
  Poiščite najdražji sprehod od korena do listov drevesa: Funkcija pot vrne v 
@@ -179,3 +190,21 @@ let test_tree = Node( Node(leaf 0, 2, leaf 13), 5, Node(leaf 9, 7, leaf 4))
 type direcion 
   = Left
   | Right
+
+let rec max_path_trace = function
+  | Empty -> []
+  | Node(Empty, x, Empty) -> []
+  | Node(lt, x, rt) -> 
+  match (max_path lt, max_path rt) with
+    | (Some a, None) -> Left :: (max_path_trace lt)
+    | (None, Some a) -> Right :: (max_path_trace rt)
+    | (Some a, Some b) when a > b -> Left :: (max_path_trace lt)
+    | (Some a, Some b) -> Right :: (max_path_trace rt)
+    | _ -> failwith "Error"
+
+let rec reconstruct tree path =
+  match (tree, path ) with
+    | (Node(Empty, x, Empty), []) -> [x]
+    | (Node (left, x, _), Left::dirs) -> x :: (reconstruct left dirs)
+    | (Node (_, x, right), Right::dirs) -> x :: (reconstruct right dirs) 
+    | _ -> failwith "Invalid path length"

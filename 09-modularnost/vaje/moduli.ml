@@ -255,5 +255,16 @@ end
  n : 2
  - : unit = ()
 [*----------------------------------------------------------------------------*)
-
-let count (module Dict : DICT) list = ()
+let count (module Dict : DICT) list =
+  let rec counter dict = function
+    | [] -> Dict.print dict
+    | x :: xs -> 
+      let new_count = 
+        match Dict.get x dict with
+        | Some x -> x + 1 
+        | None -> 1
+      in
+      let new_dict = Dict.insert x new_count dict in
+      counter new_dict xs
+  in
+  counter Dict.empty list

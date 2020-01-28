@@ -243,7 +243,15 @@ let test_dict =
  # dict_get "c" test_dict;;
  - : int option = Some (-2)
 [*----------------------------------------------------------------------------*)
-
+let rec dict_get k = function
+  | Empty -> None
+  | Node (l, (k', v), r) ->
+    if k = k' then
+      Some v
+    else if k < k' then
+      dict_get k l
+    else
+      dict_get k r
       
 (*----------------------------------------------------------------------------*]
  Funkcija [print_dict] sprejme slovar s ključi tipa [string] in vrednostmi tipa
@@ -260,7 +268,12 @@ let test_dict =
  d : 2
  - : unit = ()
 [*----------------------------------------------------------------------------*)
-
+let rec print_dict = function
+| Empty -> ()
+| Node (l, (k, v), d) -> (
+    print_dict l;
+    print_string (k ^ " : "); print_int v; print_newline ();
+    print_dict d)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_insert key value dict] v slovar [dict] pod ključ [key] vstavi
@@ -280,4 +293,8 @@ let test_dict =
  d : 2
  - : unit = ()
 [*----------------------------------------------------------------------------*)
-
+let rec dict_insert key value = function
+  |Empty -> leaf (key, value)
+  |Node(l, (k, _), r) when k = key -> Node(l, (k, value), r)
+  |Node(l, (k, v), r) when key < k-> Node(dict_insert key value l, (k, v), r)
+  |Node(l, (k, v), r)  -> Node(l, (k, v), dict_insert key value r)

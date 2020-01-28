@@ -23,7 +23,7 @@ module type Comparable = sig
 
 module Cmp_Int = struct
   type t = int
-  let compare x y = failwith "to do"
+  let compare x y = if x < y then LT else if x = y then EQ else GT
 end
 
 (*----------------------------------------------------------------------------*]
@@ -43,7 +43,10 @@ module Cmp_Int_prescribed = (Cmp_Int : Comparable with type t = int)
 
  Funkcija [Pervasives.compare s t] vrne -1 če je s < t, 0 če s = t in 1 za s > t
 [*----------------------------------------------------------------------------*)
-
+module Cmp_string = struct
+  type t = string
+  let compare x y = if Pervasives.compare x y < 0 then LT else if Pervasives.compare x y = 0 then EQ else GT
+end 
 
 (*----------------------------------------------------------------------------*]
  Funktor je preslikava iz modula v modul. Sedaj definiraj funktor, ki sprejme
@@ -54,24 +57,25 @@ module Cmp_Int_prescribed = (Cmp_Int : Comparable with type t = int)
  [module Cmp_inv (Cmp)] vendar z oznako tipov povemo, da se tip končnega 
  modula ujema s tipom modula, ki ga podamo kot argument
 [*----------------------------------------------------------------------------*)
-
-(*
 module Cmp_inv (Cmp : Comparable) : Comparable with type t = Cmp.t  = struct
-  type t = ...
-  let compare x y = ...
+  type t = Cmp.t
+  let compare x y = 
+    match Cmp.compare x y with
+    | LT -> GT
+    | EQ -> EQ
+    | GT -> LT
 end
- *)
+
 
 (*----------------------------------------------------------------------------*]
  Funktor uporabljamo podobno kot funkcije, le da v tem primeru potrebujemo
  oklepaje okrog argumentov
 [*----------------------------------------------------------------------------*)
 
-(*
 module Cmp_Int_inv = Cmp_inv (Cmp_Int)
 let _ = Cmp_Int.compare (-9000) 42;;
 let _ = Cmp_Int_inv.compare (-9000) 42;;
- *)
+
 
 (*----------------------------------------------------------------------------*]
  V primeru, ko imamo dva modula A in B, ki ju primerjamo preko [Comparable]
@@ -86,6 +90,19 @@ let _ = Cmp_Int_inv.compare (-9000) 42;;
  Definiraj funktor, ki sprejme dva modula A, B : Comparable in vrne modul
  [Cmp_lex : Comparable with type t = A.t * B.t]
 [*----------------------------------------------------------------------------*)
+module Cmp_lex (A : Comparable)(B : Comparable) : Comparable with type t = A.t * B.t  = struct
+  type t = A.t * B.t
+  let compare (a1, b1) (a2, b2) = 
+    match A.compare a1 a2 with 
+    |LT -> LT 
+    |GT -> GT
+    |EQ -> 
+    match B.compare b1 b2 with 
+      |LT -> LT 
+      |EQ -> EQ
+      |GT -> GT
+    
+end
 
 
 (*----------------------------------------------------------------------------*]
@@ -95,7 +112,6 @@ let _ = Cmp_Int_inv.compare (-9000) 42;;
  prioriteti. Ker je kopica lahko prazna, nam [pop] vrne opcijski tip
 [*----------------------------------------------------------------------------*)
 
-(*
 module type Priority_Queue = sig
     type h
     type el
@@ -103,7 +119,7 @@ module type Priority_Queue = sig
     val pop : h -> (h * el) option
     val push : h -> el -> h
   end
- *)
+
 
 
 (*----------------------------------------------------------------------------*]
@@ -112,13 +128,28 @@ module type Priority_Queue = sig
  prioritetno vrsto preko urejenega seznama. Seznam vsebuje elementa tipa [Cmp.t]
 [*----------------------------------------------------------------------------*)
 
-(*
-module Sorted_List_Priority_Queue ... = struct
 
-  ...
+module Sorted_List_Priority_Queue (Cmp : Comparable) : Priority_Queue with type el = Cmp.t = struct
+
+  type h = Cmp.t list
+  type el = Cmp.t
+  let empty = []
+  let pop = function
+    | [] -> None
+    | x :: xs -> Some (xs, x)
+
+  let rec insert x ord =
+    match ord with
+    | [] -> [x]
+    | y :: rest ->
+       (match Cmp.compare x y with
+        | LT -> x :: ord
+        | EQ -> ord
+        | GT -> y :: (insert x rest))
+
+  let push h x = insert x h
 
 end
-*)
 
 
 (*----------------------------------------------------------------------------*]
@@ -126,7 +157,12 @@ end
  vrne modul z operacijo [to_list] s katero elemente v kopici shrani v seznam. 
 [*----------------------------------------------------------------------------*)
 
-(* module To_List ... *)
+module To_List (H : Priority_Queue) = struct
+  let rec to_list h =
+    match H.pop h with
+    | None -> []
+    | Some (h, x) -> x :: (to_list h)
+end
 
 
 (*----------------------------------------------------------------------------*]
@@ -136,7 +172,6 @@ end
  ko pa uporabljamo module lokalno si lahko privoščimo krajša imena
 [*----------------------------------------------------------------------------*)
    
-(*
 let _ =
   let h = List.fold_left IntH.push IntH.empty [1; 0; 9; 2] in
   let module TL = To_List(IntH) in
@@ -147,4 +182,3 @@ let _ =
   let module L = To_List(H) in
   let h = List.fold_left H.push H.empty [1; 0; 9; 2] in
   L.to_list h
- *)
